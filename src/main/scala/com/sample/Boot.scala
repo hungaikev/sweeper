@@ -16,25 +16,26 @@ import scala.collection.JavaConversions._
   */
 object Boot {
 
-  val system = ActorSystem("DemoApp")
-
   def main(args: Array[String]): Unit = {
+
+    val system = ActorSystem("DemoApp")
+
     getScheduleNames().foreach(sendRecuringMessages(_))
     Await.ready(system.whenTerminated, Duration(1, TimeUnit.MINUTES))
+
+
+    def sendRecuringMessages(mySchedule: String) = {
+      val sweeper = system.actorOf(Sweeper.props)
+      QuartzSchedulerExtension(system).schedule(mySchedule,sweeper,Message)
+
+    }
+
+    def getScheduleNames() = {
+      val conf = ConfigFactory.load("quartz.conf")
+      val schedules = conf.getConfig("akka.quartz.schedules").entrySet()
+      schedules.map(schedule => schedule.getKey.split("\\.")(0)).toList.distinct
+    }
+
   }
-
-  def sendRecuringMessages(mySchedule: String) = {
-    val sweeper = system.actorOf(Sweeper.props)
-    QuartzSchedulerExtension(system).schedule(mySchedule,sweeper,Message)
-
-  }
-
-  def getScheduleNames() = {
-    val conf = ConfigFactory.load("quartz.conf")
-    val schedules = conf.getConfig("akka.quartz.schedules").entrySet()
-    schedules.map(schedule => schedule.getKey.split("\\.")(0)).toList.distinct
-  }
-
-
 
 }
