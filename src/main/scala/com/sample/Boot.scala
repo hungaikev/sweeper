@@ -1,13 +1,10 @@
 package com.sample
 
-import java.util.concurrent.TimeUnit
 
 import akka.actor.ActorSystem
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 import scala.collection.JavaConversions._
 
@@ -21,7 +18,6 @@ object Boot {
     val system = ActorSystem("DemoApp")
 
     getScheduleNames().foreach(sendRecuringMessages(_))
-    Await.ready(system.whenTerminated, Duration(1, TimeUnit.MINUTES))
 
 
     def sendRecuringMessages(mySchedule: String) = {
